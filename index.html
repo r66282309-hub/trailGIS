@@ -26,6 +26,13 @@
       <button id="openUpload" class="upload-btn" type="button">Carica percorso</button>
       <button id="userMenu" class="user-pill" type="button"><span id="userAvatar" class="avatar">?</span><span id="userLabel">Accedi</span><span>⌄</span></button>
     </nav>
+    <div id="explorePopover" class="header-popover" aria-hidden="true">
+      <div class="popover-title">Cerca percorso</div>
+      <div class="popover-search">
+        <input id="trailNameSearch" type="text" placeholder="Nome o parole chiave" />
+        <button id="btnSearchName" type="button">Cerca</button>
+      </div>
+    </div>
   </header>
 
   <main class="desktop-shell">
@@ -69,7 +76,28 @@
         <div class="legend-line"><span class="area-symbol"></span> Area di ricerca</div>
       </section>
 
-      <section class="upload-panel" id="uploadPanel">
+
+    </aside>
+
+    <section class="map-stage">
+      <div id="map"></div>
+      <div id="searchStatus" class="map-status">Carica i percorsi pubblicati o cerca per comune.</div>
+    </section>
+
+    <aside class="right-panel">
+      <div class="right-title">
+        <h2>Percorsi nel raggio <span id="resultCount">(0)</span></h2>
+      </div>
+      <div id="trailList" class="trail-list muted">Nessun percorso caricato.</div>
+      <button id="btnLoadRemote" class="load-more" type="button">Carica percorsi pubblicati</button>
+      <button id="btnResetSearch" class="reset-link" type="button">Mostra tutti</button>
+    </aside>
+  </main>
+
+
+  <div id="uploadModal" class="modal-backdrop" aria-hidden="true">
+    <div class="upload-modal" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+      <section class="upload-panel open" id="uploadPanel">
         <div class="section-row"><h2>Carica percorso</h2><button id="closeUpload" class="icon-btn" type="button">×</button></div>
         <input id="gpxFile" type="file" accept=".gpx,.kml,.kmz,.trk,application/gpx+xml,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz,text/xml" />
         <input id="trailTitle" type="text" placeholder="Nome percorso" />
@@ -83,29 +111,8 @@
           <button id="btnClear" class="ghost" type="button">Pulisci</button>
         </div>
       </section>
-    </aside>
-
-    <section class="map-stage">
-      <div id="map"></div>
-      <div class="floating-layers">
-        <h3>Livelli mappa</h3>
-        <label><span class="thumb topo"></span><input name="floatingLayer" value="topo" type="radio" checked />Esri Topo</label>
-        <label><span class="thumb imagery"></span><input name="floatingLayer" value="imagery" type="radio" />Esri Imagery</label>
-        <label><span class="thumb streets"></span><input name="floatingLayer" value="streets" type="radio" />Esri Streets</label>
-      </div>
-      <div class="top-search" id="nameSearchBox"><input id="trailNameSearch" type="text" placeholder="Cerca percorso per nome" /><button id="btnSearchName" type="button">Cerca</button></div>
-      <div id="searchStatus" class="map-status">Carica i percorsi pubblicati o cerca per comune.</div>
-    </section>
-
-    <aside class="right-panel">
-      <div class="right-title">
-        <h2>Percorsi nel raggio <span id="resultCount">(0)</span></h2>
-      </div>
-      <div id="trailList" class="trail-list muted">Nessun percorso caricato.</div>
-      <button id="btnLoadRemote" class="load-more" type="button">Carica percorsi pubblicati</button>
-      <button id="btnResetSearch" class="reset-link" type="button">Mostra tutti</button>
-    </aside>
-  </main>
+    </div>
+  </div>
 
   <div id="authModal" class="modal-backdrop" aria-hidden="true">
     <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
