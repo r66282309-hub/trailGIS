@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TrailGIS Sardegna</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 96 64" role="img"><path d="M6 56 31 13l17 28 10-15 32 30H6Z"/><path d="M31 13 39 56M58 26 67 56"/><path d="M26 34h13l8-13 11 18"/></svg>
+      </div>
+      <div>
+        <h1>TrailGIS Sardegna</h1>
+        <p>Esplora. Condividi. Valorizza.</p>
+      </div>
+    </div>
+    <nav class="header-nav" aria-label="Navigazione principale">
+      <button id="btnExplore" class="nav-link active" type="button">⌕ Esplora</button>
+      <button id="btnMyTrails" class="nav-link" type="button">▣ I miei percorsi</button>
+      <button id="openUpload" class="upload-btn" type="button">Carica percorso</button>
+      <button id="userMenu" class="user-pill" type="button"><span id="userAvatar" class="avatar">?</span><span id="userLabel">Accedi</span><span>⌄</span></button>
+    </nav>
+  </header>
+
+  <main class="desktop-shell">
+    <aside class="left-panel panel-scroll">
+      <section class="side-section">
+        <h2>Cerca per comune</h2>
+        <div class="search-box">
+          <input id="municipalitySearch" type="text" placeholder="Inserisci il nome del comune" />
+          <button id="btnSearchMunicipality" title="Cerca" type="button">⌕</button>
+        </div>
+      </section>
+
+      <section class="side-section">
+        <div class="section-row"><h2>Raggio di ricerca</h2><output id="radiusValue">20 km</output></div>
+        <input id="radiusKm" class="range" type="range" min="5" max="50" step="5" value="20" />
+        <div class="range-labels"><span>5 km</span><span>25 km</span><span>50 km</span></div>
+        <button id="btnSearchMunicipality2" class="primary full" type="button">Cerca percorsi</button>
+      </section>
+
+      <section class="info-card">
+        <div class="info-icon">ⓘ</div>
+        <div>
+          <h3>Come funziona</h3>
+          <p>Cerca un comune e scegli il raggio di ricerca. Verranno visualizzati tutti i percorsi pubblicati in quell'area.</p>
+        </div>
+      </section>
+
+      <section class="side-section divider">
+        <h2>Livello mappa</h2>
+        <select id="baseLayerSelect" class="layer-select">
+          <option value="topo" selected>Esri Topo</option>
+          <option value="imagery">Esri Imagery</option>
+          <option value="streets">Esri Streets</option>
+        </select>
+      </section>
+
+      <section class="legend-card">
+        <h2>Legenda</h2>
+        <div class="legend-line"><span class="line-symbol"></span> Percorso visibile</div>
+        <div class="legend-line"><span class="dot-symbol"></span> Marker comune selezionato</div>
+        <div class="legend-line"><span class="area-symbol"></span> Area di ricerca</div>
+      </section>
+
+      <section class="upload-panel" id="uploadPanel">
+        <div class="section-row"><h2>Carica percorso</h2><button id="closeUpload" class="icon-btn" type="button">×</button></div>
+        <input id="gpxFile" type="file" accept=".gpx,.kml,.kmz,.trk,application/gpx+xml,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz,text/xml" />
+        <input id="trailTitle" type="text" placeholder="Nome percorso" />
+        <small class="field-help">Formati accettati: GPX, KML, KMZ, TRK.</small>
+        <input id="trailArea" type="text" placeholder="Zona / Comune" />
+        <textarea id="trailDescription" rows="3" placeholder="Descrizione, accessi, note utili..."></textarea>
+        <div id="stats" class="stats muted">Nessuna traccia caricata.</div>
+        <div class="button-grid">
+          <button id="btnPublish" class="primary" disabled type="button">Pubblica</button>
+          <button id="btnDownload" class="outline" disabled type="button">Scarica GPX</button>
+          <button id="btnClear" class="ghost" type="button">Pulisci</button>
+        </div>
+      </section>
+    </aside>
+
+    <section class="map-stage">
+      <div id="map"></div>
+      <div class="floating-layers">
+        <h3>Livelli mappa</h3>
+        <label><span class="thumb topo"></span><input name="floatingLayer" value="topo" type="radio" checked />Esri Topo</label>
+        <label><span class="thumb imagery"></span><input name="floatingLayer" value="imagery" type="radio" />Esri Imagery</label>
+        <label><span class="thumb streets"></span><input name="floatingLayer" value="streets" type="radio" />Esri Streets</label>
+      </div>
+      <div class="top-search" id="nameSearchBox"><input id="trailNameSearch" type="text" placeholder="Cerca percorso per nome" /><button id="btnSearchName" type="button">Cerca</button></div>
+      <div id="searchStatus" class="map-status">Carica i percorsi pubblicati o cerca per comune.</div>
+    </section>
+
+    <aside class="right-panel">
+      <div class="right-title">
+        <h2>Percorsi nel raggio <span id="resultCount">(0)</span></h2>
+      </div>
+      <div id="trailList" class="trail-list muted">Nessun percorso caricato.</div>
+      <button id="btnLoadRemote" class="load-more" type="button">Carica percorsi pubblicati</button>
+      <button id="btnResetSearch" class="reset-link" type="button">Mostra tutti</button>
+    </aside>
+  </main>
+
+  <div id="authModal" class="modal-backdrop" aria-hidden="true">
+    <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="section-row">
+        <h2 id="authTitle">Accesso utente</h2>
+        <button id="closeAuth" class="icon-btn" type="button">×</button>
+      </div>
+      <div class="auth-tabs">
+        <button id="tabLogin" class="active" type="button">Accedi</button>
+        <button id="tabRegister" type="button">Registrati</button>
+      </div>
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email" />
+      <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" />
+      <input id="authName" type="text" placeholder="Nome visualizzato" class="hidden" />
+      <button id="btnAuthSubmit" class="primary full" type="button">Accedi</button>
+      <button id="btnLogout" class="outline full hidden" type="button">Esci</button>
+      <p id="authMessage" class="auth-message muted">Accedi per vedere i tuoi percorsi e pubblicare nuove tracce.</p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

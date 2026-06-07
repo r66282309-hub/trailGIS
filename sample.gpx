@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="TrailGIS" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>Traccia esempio</name>
+    <trkseg>
+      <trkpt lat="40.0000" lon="9.0000"><ele>120</ele><time>2026-06-07T08:00:00Z</time></trkpt>
+      <trkpt lat="40.0030" lon="9.0040"><ele>150</ele><time>2026-06-07T08:10:00Z</time></trkpt>
+      <trkpt lat="40.0060" lon="9.0080"><ele>180</ele><time>2026-06-07T08:20:00Z</time></trkpt>
+      <trkpt lat="40.0100" lon="9.0120"><ele>210</ele><time>2026-06-07T08:35:00Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
