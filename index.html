@@ -24,6 +24,7 @@
       <button id="btnExplore" class="nav-link active" type="button">⌕ Esplora</button>
       <button id="btnMyTrails" class="nav-link" type="button">▣ I miei percorsi</button>
       <button id="openUpload" class="upload-btn" type="button">Carica percorso</button>
+      <button id="btnAddPoi" class="nav-link" type="button">＋ POI</button>
       <button id="userMenu" class="user-pill" type="button"><span id="userAvatar" class="avatar">?</span><span id="userLabel">Accedi</span><span>⌄</span></button>
     </nav>
     <div id="explorePopover" class="header-popover" aria-hidden="true">
@@ -111,6 +112,96 @@
           <button id="btnClear" class="ghost" type="button">Pulisci</button>
         </div>
       </section>
+    </div>
+  </div>
+
+
+  <div id="poiModal" class="modal-backdrop" aria-hidden="true">
+    <div class="poi-modal" role="dialog" aria-modal="true" aria-labelledby="poiTitle">
+      <div class="section-row">
+        <h2 id="poiTitle">Aggiungi punto</h2>
+        <button id="closePoi" class="icon-btn" type="button">×</button>
+      </div>
+      <p id="poiPosition" class="field-help">Clicca sulla mappa per scegliere la posizione.</p>
+      <label class="form-label" for="poiCategory">Categoria</label>
+      <select id="poiCategory" class="form-control">
+        <option value="bene_identitario">Bene identitario</option>
+        <option value="belvedere">Belvedere</option>
+        <option value="rifugio">Rifugio</option>
+        <option value="parcheggio">Parcheggio</option>
+        <option value="segnalazione">Segnalazione / criticità</option>
+      </select>
+
+      <div id="poiSubtypeWrap">
+        <label class="form-label" for="poiSubtype">Tipo</label>
+        <select id="poiSubtype" class="form-control"></select>
+      </div>
+
+      <label class="form-label" for="poiName">Nome</label>
+      <input id="poiName" type="text" placeholder="Nome del punto" />
+
+      <label class="form-label" for="poiPhoto">Foto</label>
+      <input id="poiPhoto" type="file" accept="image/*" />
+
+      <div id="shelterFields" class="conditional-fields hidden">
+        <div class="two-cols">
+          <div>
+            <label class="form-label" for="shelterCapacity">Posti stimati</label>
+            <input id="shelterCapacity" type="number" min="0" step="1" placeholder="Es. 6" />
+          </div>
+          <div>
+            <label class="form-label" for="shelterStatus">Stato</label>
+            <select id="shelterStatus" class="form-control">
+              <option value="non_noto">Non noto</option>
+              <option value="aperto">Aperto</option>
+              <option value="chiuso">Chiuso</option>
+              <option value="rudere">Rudere</option>
+            </select>
+          </div>
+        </div>
+        <div class="two-cols">
+          <div>
+            <label class="form-label" for="shelterAccess">Accessibilità</label>
+            <select id="shelterAccess" class="form-control">
+              <option value="non_valutata">Non valutata</option>
+              <option value="facile">Facile</option>
+              <option value="sentiero">Sentiero</option>
+              <option value="esperti">Solo esperti</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="waterAvailable">Acqua</label>
+            <select id="waterAvailable" class="form-control">
+              <option value="non_verificata">Non verificata</option>
+              <option value="si">Sì</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="parkingFields" class="conditional-fields hidden">
+        <div class="two-cols">
+          <div>
+            <label class="form-label" for="parkingSpaces">Posti stimati</label>
+            <input id="parkingSpaces" type="number" min="0" step="1" placeholder="Es. 20" />
+          </div>
+          <div>
+            <label class="form-label" for="parkingAccess">Accessibilità</label>
+            <select id="parkingAccess" class="form-control">
+              <option value="non_valutata">Non valutata</option>
+              <option value="asfalto">Asfalto</option>
+              <option value="sterrato">Sterrato</option>
+              <option value="4x4">4x4</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <label class="form-label" for="poiNote">Note</label>
+      <textarea id="poiNote" rows="3" placeholder="Descrizione, stato, accesso, dettagli utili..."></textarea>
+      <button id="btnSavePoi" class="primary full" type="button">Salva punto</button>
+      <p id="poiMessage" class="auth-message muted">Il punto sarà salvato nella posizione scelta sulla mappa.</p>
     </div>
   </div>
 
