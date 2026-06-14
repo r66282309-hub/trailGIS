@@ -394,7 +394,58 @@ function categoryLabel(value) { return ({ bene_identitario: "Bene identitario", 
 function subtypeLabel(category, value) { return (poiSubtypes[category] || []).find(([v]) => v === value)?.[1] || value || ""; }
 function valueLabel(value) { return String(value || "n.d.").replaceAll("_", " "); }
 
-function renderTrailList(trails) { const list = $("trailList"); $("resultCount").textContent = `(${trails.length})`; if (!trails.length) { list.classList.add("muted"); list.textContent = "Nessun percorso trovato."; return; } list.classList.remove("muted"); list.innerHTML = ""; trails.forEach((trail, index) => { const km = ((trail.distance_m || 0) / 1000); const difficulty = km > 14 ? "hard" : km > 8 ? "medium" : "easy"; const difficultyText = difficulty === "hard" ? "Difficile" : difficulty === "medium" ? "Media" : "Facile"; const card = document.createElement("article"); card.className = "trail-card"; card.innerHTML = `<div class="trail-thumb ${difficulty}"></div><div><h3>${escapeHtml(trail.title || "Percorso")}</h3><p>${escapeHtml(trail.area || "Zona non indicata")}</p><p class="trail-meta">${km.toFixed(1)} km · ${estimateElevationText(trail, index)}</p><span class="badge ${difficulty}">${difficultyText}</span><div class="card-actions"><button data-action="view" type="button">Vedi mappa</button><button data-action="download" type="button">Scarica</button></div></div>`; card.querySelector('[data-action="view"]').addEventListener("click", () => drawPublishedRoute(trail)); card.querySelector('[data-action="download"]').addEventListener("click", () => downloadText(`${safeFileName(trail.title)}.${trail.source_format || "gpx"}`, trail.gpx_xml || "")); list.appendChild(card); }); }
+function renderTrailList(trails) {
+  const list = $("trailList");
+  $("resultCount").textContent = `(${trails.length})`;
+  if (!trails.length) {
+    list.classList.add("muted");
+    list.textContent = "Nessun percorso trovato.";
+    return;
+  }
+  list.classList.remove("muted");
+  list.innerHTML = "";
+  trails.forEach((trail, index) => {
+    const km = ((trail.distance_m || 0) / 1000);
+    const difficulty = km > 14 ? "hard" : km > 8 ? "medium" : "easy";
+    const difficultyText = difficulty === "hard" ? "Difficile" : difficulty === "medium" ? "Media" : "Facile";
+    const card = document.createElement("article");
+    card.className = "trail-card";
+    card.innerHTML = `<div class="trail-thumb ${difficulty}"></div><div><h3>${escapeHtml(trail.title || "Percorso")}</h3><p>${escapeHtml(trail.area || "Zona non indicata")}</p><p class="trail-meta">${km.toFixed(1)} km · ${estimateElevationText(trail, index)}</p><span class="badge ${difficulty}">${difficultyText}</span><div class="card-actions"><button data-action="view" type="button">Vedi mappa</button><button data-action="weather" type="button">Meteo</button><button data-action="download" type="button">Scarica</button></div><div class="weather-result muted" hidden></div></div>`;
+    card.querySelector('[data-action="view"]').addEventListener("click", () => drawPublishedRoute(trail));
+    card.querySelector('[data-action="weather"]').addEventListener("click", () => showTrailWeather(trail, card.querySelector(".weather-result")));
+    card.querySelector('[data-action="download"]').addEventListener("click", () => downloadText(`${safeFileName(trail.title)}.${trail.source_format || "gpx"}`, trail.gpx_xml || ""));
+    list.appendChild(card);
+  });
+}
+
+async function showTrailWeather(trail, box) {
+  const centroid = getTrailCentroid(trail);
+  if (!centroid) {
+    box.hidden = false;
+    box.textContent = "Meteo non disponibile: percorso senza coordinate valide.";
+    return;
+  }
+  box.hidden = false;
+  box.textContent = "Meteo in caricamento...";
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(centroid.lat)}&longitude=${encodeURIComponent(centroid.lon)}&daily=temperature_2m_max,precipitation_sum&forecast_days=2&timezone=Europe%2FRome`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const maxTemp = data?.daily?.temperature_2m_max?.[0];
+    const rainMm = data?.daily?.precipitation_sum?.[0];
+    if (!Number.isFinite(maxTemp) || !Number.isFinite(rainMm)) throw new Error("dati meteo incompleti");
+    const km = ((trail.distance_m || 0) / 1000);
+    const rainText = rainMm > 0.2 ? `sì (${rainMm.toFixed(1)} mm)` : "no";
+    const notes = [];
+    if (maxTemp >= 34) notes.push("evita le ore centrali");
+    if (maxTemp >= 30 && km >= 10) notes.push("consigliati 2+ litri d'acqua");
+    if (rainMm > 0.2 && km >= 8) notes.push("possibili tratti scivolosi");
+    box.innerHTML = `<strong>Meteo oggi</strong><br>Temp. max: ${maxTemp.toFixed(0)} °C · Pioggia: ${rainText}${notes.length ? `<br><span>${escapeHtml(notes.join(" · "))}</span>` : ""}`;
+  } catch (err) {
+    box.textContent = "Meteo non disponibile ora: " + err.message;
+  }
+}
 function estimateElevationText(trail, index) { if (trail.elevation_gain) return `${Math.round(trail.elevation_gain)} m disl.`; const fallback = [550, 950, 320, 430, 610, 780, 260, 890]; return `${fallback[index % fallback.length]} m disl.`; }
 function downloadCurrentRoute() { const title = $("trailTitle").value.trim() || "percorso"; downloadText(`${safeFileName(title)}.${current.sourceFormat || "gpx"}`, current.sourceText); }
 function downloadText(filename, text) { const blob = new Blob([text || ""], { type: "application/octet-stream" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url); }
