@@ -3,6 +3,7 @@
 const SUPABASE_URL = "https://uvkboeiognxsmkufmzgs.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2a2JvZWlvZ254c21rdWZtemdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDY0MjMsImV4cCI6MjA5NTAyMjQyM30.XRefx4ztMwKU4O8Q6BS-KHZLuNGrBR-En35f1vLgEW8";
 const PHOTO_BUCKET = "trail-photos";
+const MODEL_BUCKET = "trail-models";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const $ = (id) => document.getElementById(id);
@@ -249,6 +250,7 @@ function updatePoiFields() {
   subtype.innerHTML = (poiSubtypes[category] || []).map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
   $("shelterFields").classList.toggle("hidden", category !== "rifugio");
   $("parkingFields").classList.toggle("hidden", category !== "parcheggio");
+  $("identityModelFields").classList.toggle("hidden", category !== "bene_identitario");
 }
 
 async function savePoi() {
@@ -262,7 +264,9 @@ async function savePoi() {
 
     const category = $("poiCategory").value;
     let photoUrl = null;
+    let glbUrl = null;
     const photoFile = $("poiPhoto").files?.[0];
+    const glbFile = $("poiGlb")?.files?.[0];
 
     if (photoFile) {
       $("poiMessage").textContent = "Ridimensionamento foto...";
@@ -279,6 +283,21 @@ async function savePoi() {
       photoUrl = data?.publicUrl || null;
     }
 
+    if (category === "bene_identitario" && glbFile) {
+      const ext = glbFile.name.split(".").pop().toLowerCase();
+      if (ext !== "glb") { $("poiMessage").textContent = "Il modello 3D deve essere un file .glb"; return; }
+      const maxSize = 50 * 1024 * 1024;
+      if (glbFile.size > maxSize) { $("poiMessage").textContent = "GLB troppo grande: limite 50 MB."; return; }
+      const modelPath = `${currentUser.id}/${Date.now()}_${safeFileName($("poiName").value || "modello")}.glb`;
+      $("poiMessage").textContent = "Caricamento modello 3D...";
+      const modelUpload = await supabaseClient.storage
+        .from(MODEL_BUCKET)
+        .upload(modelPath, glbFile, { upsert: false, contentType: "model/gltf-binary" });
+      if (modelUpload.error) { $("poiMessage").textContent = "GLB non caricato: " + modelUpload.error.message; return; }
+      const { data } = supabaseClient.storage.from(MODEL_BUCKET).getPublicUrl(modelPath);
+      glbUrl = data?.publicUrl || null;
+    }
+
     $("poiMessage").textContent = "Salvataggio punto...";
     const payload = {
       user_id: currentUser.id,
@@ -289,6 +308,7 @@ async function savePoi() {
       lat: poiLatLng.lat,
       lon: poiLatLng.lng,
       photo_url: photoUrl,
+      glb_url: glbUrl,
       shelter_status: category === "rifugio" ? $("shelterStatus").value : null,
       shelter_capacity: category === "rifugio" && $("shelterCapacity").value ? Number($("shelterCapacity").value) : null,
       shelter_access: category === "rifugio" ? $("shelterAccess").value : null,
@@ -354,6 +374,7 @@ function resizeImageToTrailStandard(file) {
 
 function resetPoiForm() {
   $("poiName").value = ""; $("poiNote").value = ""; $("poiPhoto").value = "";
+  if ($("poiGlb")) $("poiGlb").value = "";
   $("shelterCapacity").value = ""; $("parkingSpaces").value = "";
   poiLatLng = null;
 }
@@ -387,6 +408,7 @@ function poiPopupHtml(p) {
   if (p.category === "rifugio") rows.push(`<p><strong>Posti:</strong> ${p.shelter_capacity ?? "n.d."}<br><strong>Stato:</strong> ${escapeHtml(valueLabel(p.shelter_status))}<br><strong>Accessibilità:</strong> ${escapeHtml(valueLabel(p.shelter_access))}<br><strong>Acqua:</strong> ${escapeHtml(valueLabel(p.water_available))}</p>`);
   if (p.category === "parcheggio") rows.push(`<p><strong>Posti:</strong> ${p.parking_spaces ?? "n.d."}<br><strong>Accessibilità:</strong> ${escapeHtml(valueLabel(p.parking_access))}</p>`);
   if (p.photo_url) rows.push(`<img class="poi-popup-photo" src="${escapeHtml(p.photo_url)}" alt="Foto del punto" />`);
+  if (p.glb_url) rows.push(`<details class="poi-model-details"><summary>Visualizza modello 3D</summary><model-viewer class="poi-model-viewer" src="${escapeHtml(p.glb_url)}" camera-controls auto-rotate interaction-prompt="none" shadow-intensity="0.7"></model-viewer></details>`);
   return rows.join("");
 }
 

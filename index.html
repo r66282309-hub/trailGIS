@@ -143,6 +143,12 @@
       <label class="form-label" for="poiPhoto">Foto</label>
       <input id="poiPhoto" type="file" accept="image/*" />
 
+      <div id="identityModelFields" class="conditional-fields hidden">
+        <label class="form-label" for="poiGlb">Modello 3D GLB</label>
+        <input id="poiGlb" type="file" accept=".glb,model/gltf-binary" />
+        <small class="field-help">Opzionale. Disponibile solo per i beni identitari.</small>
+      </div>
+
       <div id="shelterFields" class="conditional-fields hidden">
         <div class="two-cols">
           <div>
@@ -227,6 +233,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="app.js"></script>
 </body>

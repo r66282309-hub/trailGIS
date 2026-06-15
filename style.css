@@ -51,3 +51,8 @@ button{cursor:pointer}
 
 /* Integrazione meteo semplice */
 .weather-result{margin-top:8px;border:1px solid #dce5e1;background:#f7fbf8;border-radius:8px;padding:8px 9px;font-size:12px;line-height:1.45;color:#31453d}.weather-result strong{color:#12392f}.weather-result span{color:#7a4b00;font-weight:700}
+
+/* Modelli 3D per beni identitari */
+.poi-model-details{margin-top:10px}
+.poi-model-details summary{cursor:pointer;font-weight:900;color:var(--green-700);margin-bottom:8px}
+.poi-model-viewer{width:260px;max-width:100%;height:220px;border:1px solid #dce5e1;border-radius:10px;background:#f5f7f6}
