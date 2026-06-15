@@ -56,3 +56,11 @@ button{cursor:pointer}
 .poi-model-details{margin-top:10px}
 .poi-model-details summary{cursor:pointer;font-weight:900;color:var(--green-700);margin-bottom:8px}
 .poi-model-viewer{width:260px;max-width:100%;height:220px;border:1px solid #dce5e1;border-radius:10px;background:#f5f7f6}
+
+
+/* Popup POI più grande per foto e modelli 3D */
+.poi-large-popup .leaflet-popup-content{width:420px!important;max-width:88vw;margin:14px 16px;}
+.poi-large-popup .poi-popup-photo{width:360px;max-width:100%;border-radius:10px;margin-top:10px;}
+.poi-large-popup .poi-model-viewer{width:380px;max-width:100%;height:340px;border:1px solid #dce5e1;border-radius:12px;background:#f5f7f6;}
+.poi-large-popup .poi-model-details summary{font-size:15px;margin:10px 0;}
+@media(max-width:700px){.poi-large-popup .leaflet-popup-content{width:82vw!important}.poi-large-popup .poi-model-viewer{height:300px}}

@@ -390,7 +390,7 @@ function renderWaypoints(points) {
   points.forEach(p => {
     if (!Number.isFinite(Number(p.lat)) || !Number.isFinite(Number(p.lon))) return;
     const marker = L.marker([Number(p.lat), Number(p.lon)], { icon: poiIcon(p.category) });
-    marker.bindPopup(poiPopupHtml(p));
+    marker.bindPopup(poiPopupHtml(p), { maxWidth: 560, minWidth: 420, className: "poi-large-popup" });
     waypointLayer.addLayer(marker);
   });
 }
