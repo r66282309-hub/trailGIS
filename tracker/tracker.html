@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>TrailGIS Tracker</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>TrailGIS Tracker</h1>
+      <p>Traccia. Salva. Sincronizza.</p>
+    </div>
+    <div id="netBadge" class="badge">Online</div>
+  </header>
+
+  <main class="app">
+    <section class="map-wrap">
+      <div id="map"></div>
+      <div id="gpsStatus" class="status-card">GPS in attesa…</div>
+    </section>
+
+    <section class="panel">
+      <div class="grid2">
+        <label>Frequenza
+          <select id="intervalSec">
+            <option value="1">1 sec</option>
+            <option value="3" selected>3 sec</option>
+            <option value="5">5 sec</option>
+            <option value="10">10 sec</option>
+          </select>
+        </label>
+        <label>Precisione min.
+          <select id="minAccuracy">
+            <option value="9999">Qualsiasi</option>
+            <option value="50" selected>&lt; 50 m</option>
+            <option value="25">&lt; 25 m</option>
+            <option value="10">&lt; 10 m</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="buttons">
+        <button id="btnStart" class="primary">Start</button>
+        <button id="btnStop" class="danger" disabled>Stop</button>
+        <button id="btnCenter" class="ghost">Centra</button>
+      </div>
+
+      <div class="stats">
+        <div><b id="pointCount">0</b><span>punti</span></div>
+        <div><b id="distanceKm">0.00</b><span>km</span></div>
+        <div><b id="elapsedTime">00:00:00</b><span>tempo</span></div>
+      </div>
+
+      <label>Nome percorso
+        <input id="trailName" type="text" placeholder="Es. Anello di Portofixeddu" />
+      </label>
+      <label>Comune / zona
+        <input id="trailArea" type="text" placeholder="Es. Sassari, Porto Ferro" />
+      </label>
+
+      <div class="buttons">
+        <button id="btnSaveGpx" class="outline" disabled>Salva GPX</button>
+        <button id="btnUpload" class="primary" disabled>Upload</button>
+      </div>
+
+      <p id="message" class="message">La traccia resta sul dispositivo. Se sei offline viene messa in coda.</p>
+      <div class="queue-row">
+        <span>Tracce in coda: <b id="queueCount">0</b></span>
+        <button id="btnSync" class="ghost">Sincronizza</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
