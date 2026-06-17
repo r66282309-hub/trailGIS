@@ -1,5 +1,5 @@
 const SUPABASE_URL = "https://uvkboeiognxsmkufmzgs.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InV2a2JvZWlvZ254c21rdWZtemdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDY0MjMsImV4cCI6MjA5NTAyMjQyM30.XRefx4ztMwKU4O8Q6BS-KHZLuNGrBR-En35f1vLgEW8Q6BS-KHZLuNGrBR-En35f1vLgEW8";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2a2JvZWlvZ254c21rdWZtemdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDY0MjMsImV4cCI6MjA5NTAyMjQyM30.XRefx4ztMwKU4O8Q6BS-KHZLuNGrBR-En35f1vLgEW8";
 // Se la key sopra è stata copiata male, sostituiscila con quella del portale.
 let sb = null;
 try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e) { console.warn(e); }
@@ -20,6 +20,11 @@ function setMessage(t){ els('message').textContent = t; }
 function setGps(t){ els('gpsStatus').textContent = t; }
 function updateNet(){ const online=navigator.onLine; els('netBadge').textContent=online?'Online':'Offline'; els('netBadge').classList.toggle('offline',!online); }
 window.addEventListener('online', updateNet); window.addEventListener('offline', updateNet); updateNet();
+function showPostTrackPanel(show){
+  const panel = els('postTrackPanel');
+  if(panel) panel.classList.toggle('hidden', !show);
+}
+
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(console.warn);
 
@@ -58,6 +63,7 @@ function acceptPosition(pos){
 function startTracking(){
   if(!navigator.geolocation){ setMessage('GPS non disponibile su questo dispositivo.'); return; }
   state.tracking=true; state.points=[]; state.startTime=Date.now(); state.lastAcceptedAt=0; state.lastBlob=null;
+  showPostTrackPanel(false);
   if(state.line) state.line.remove(); state.line=null;
   els('btnStart').disabled=true; els('btnStop').disabled=false; els('btnSaveGpx').disabled=true; els('btnUpload').disabled=true;
   requestWakeLock();
@@ -67,7 +73,7 @@ function startTracking(){
 function stopTracking(){
   state.tracking=false; if(state.watchId!==null) navigator.geolocation.clearWatch(state.watchId); clearInterval(state.elapsedId); releaseWakeLock();
   els('btnStart').disabled=false; els('btnStop').disabled=true; els('btnSaveGpx').disabled=state.points.length<2; els('btnUpload').disabled=state.points.length<2;
-  localStorage.removeItem('trailgis_current_track'); setMessage(`Traccia terminata: ${state.points.length} punti.`);
+  localStorage.removeItem('trailgis_current_track'); showPostTrackPanel(true); setMessage(`Traccia terminata: ${state.points.length} punti.`);
 }
 function escapeXml(s){ return String(s||'').replace(/[<>&'"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c])); }
 function buildGpx(){
@@ -99,4 +105,4 @@ async function syncQueue(){
 
 els('btnStart').onclick=startTracking; els('btnStop').onclick=stopTracking; els('btnSaveGpx').onclick=saveGpx; els('btnUpload').onclick=uploadTrack; els('btnSync').onclick=syncQueue;
 els('btnCenter').onclick=()=>{ if(state.currentMarker) map.setView(state.currentMarker.getLatLng(), 17); else navigator.geolocation?.getCurrentPosition(p=>map.setView([p.coords.latitude,p.coords.longitude],16)); };
-updateQueue(); refreshStats();
+showPostTrackPanel(false); updateQueue(); refreshStats();

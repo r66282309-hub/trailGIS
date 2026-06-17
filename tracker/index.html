@@ -9,41 +9,23 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>TrailGIS Tracker</h1>
-      <p>Traccia. Salva. Sincronizza.</p>
-    </div>
-    <div id="netBadge" class="badge">Online</div>
-  </header>
+  <main class="tracker-screen">
+    <div id="map"></div>
 
-  <main class="app">
-    <section class="map-wrap">
-      <div id="map"></div>
-      <div id="gpsStatus" class="status-card">GPS in attesa…</div>
-    </section>
-
-    <section class="panel">
-      <div class="grid2">
-        <label>Frequenza
-          <select id="intervalSec">
-            <option value="1">1 sec</option>
-            <option value="3" selected>3 sec</option>
-            <option value="5">5 sec</option>
-            <option value="10">10 sec</option>
-          </select>
-        </label>
-        <label>Precisione min.
-          <select id="minAccuracy">
-            <option value="9999">Qualsiasi</option>
-            <option value="50" selected>&lt; 50 m</option>
-            <option value="25">&lt; 25 m</option>
-            <option value="10">&lt; 10 m</option>
-          </select>
-        </label>
+    <header class="topbar overlay-card">
+      <div>
+        <h1>TrailGIS Tracker</h1>
+        <p>Traccia. Salva. Sincronizza.</p>
       </div>
+      <div id="netBadge" class="badge">Online</div>
+    </header>
 
-      <div class="buttons">
+    <div id="gpsStatus" class="gps-card overlay-card">GPS in attesa…</div>
+
+    <section class="control-sheet overlay-card">
+      <div class="sheet-handle" aria-hidden="true"></div>
+
+      <div class="quick-row">
         <button id="btnStart" class="primary">Start</button>
         <button id="btnStop" class="danger" disabled>Stop</button>
         <button id="btnCenter" class="ghost">Centra</button>
@@ -55,22 +37,45 @@
         <div><b id="elapsedTime">00:00:00</b><span>tempo</span></div>
       </div>
 
-      <label>Nome percorso
-        <input id="trailName" type="text" placeholder="Es. Anello di Portofixeddu" />
-      </label>
-      <label>Comune / zona
-        <input id="trailArea" type="text" placeholder="Es. Sassari, Porto Ferro" />
-      </label>
-
-      <div class="buttons">
-        <button id="btnSaveGpx" class="outline" disabled>Salva GPX</button>
-        <button id="btnUpload" class="primary" disabled>Upload</button>
+      <div class="grid2 compact-row">
+        <label>Frequenza
+          <select id="intervalSec">
+            <option value="1">1 sec</option>
+            <option value="3" selected>3 sec</option>
+            <option value="5">5 sec</option>
+            <option value="10">10 sec</option>
+          </select>
+        </label>
+        <label>Precisione
+          <select id="minAccuracy">
+            <option value="9999">Qualsiasi</option>
+            <option value="50" selected>&lt; 50 m</option>
+            <option value="25">&lt; 25 m</option>
+            <option value="10">&lt; 10 m</option>
+          </select>
+        </label>
       </div>
 
-      <p id="message" class="message">La traccia resta sul dispositivo. Se sei offline viene messa in coda.</p>
-      <div class="queue-row">
-        <span>Tracce in coda: <b id="queueCount">0</b></span>
-        <button id="btnSync" class="ghost">Sincronizza</button>
+      <p id="message" class="message">Premi Start per iniziare una nuova traccia.</p>
+
+      <div id="postTrackPanel" class="post-track-panel hidden">
+        <label>Nome percorso
+          <input id="trailName" type="text" placeholder="Es. Anello di Portofixeddu" />
+        </label>
+        <label>Comune / zona
+          <input id="trailArea" type="text" placeholder="Es. Sassari, Porto Ferro" />
+        </label>
+
+        <div class="quick-row">
+          <button id="btnSaveGpx" class="outline" disabled>Salva GPX</button>
+          <button id="btnUpload" class="primary" disabled>Upload</button>
+        </div>
+
+        <p class="message">La traccia resta sul dispositivo. Se sei offline viene messa in coda.</p>
+        <div class="queue-row">
+          <span>Coda: <b id="queueCount">0</b></span>
+          <button id="btnSync" class="ghost small">Sincronizza</button>
+        </div>
       </div>
     </section>
   </main>
