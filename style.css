@@ -64,3 +64,45 @@ button{cursor:pointer}
 .poi-large-popup .poi-model-viewer{width:380px;max-width:100%;height:340px;border:1px solid #dce5e1;border-radius:12px;background:#f5f7f6;}
 .poi-large-popup .poi-model-details summary{font-size:15px;margin:10px 0;}
 @media(max-width:700px){.poi-large-popup .leaflet-popup-content{width:82vw!important}.poi-large-popup .poi-model-viewer{height:300px}}
+
+
+/* Toggle POI: spento di default */
+.map-poi-toggle{position:absolute;right:14px;top:14px;z-index:700;border:1px solid #d7e1dc;background:rgba(255,255,255,.94);color:#0e2b23;border-radius:999px;padding:9px 12px;font-weight:900;font-size:13px;box-shadow:0 8px 24px rgba(10,41,31,.16)}
+.map-poi-toggle.active{background:#13704f;color:#fff;border-color:#13704f}
+
+/* Mobile: la lista percorsi deve scorrere nel pannello */
+@media(max-width:900px){
+  .right-panel{height:46vh;min-height:360px;display:flex;flex-direction:column;overflow:hidden}
+  .trail-list{overflow-y:auto!important;min-height:0;flex:1;padding-right:4px;scrollbar-width:thin}
+  .load-more,.reset-link{flex:0 0 auto}
+  .map-poi-toggle{top:12px;right:12px;font-size:12px;padding:8px 10px}
+}
+
+/* Fix desktop/tablet: lista percorsi sempre scrollabile anche con box meteo aperti */
+.right-panel{
+  height:calc(100vh - 70px)!important;
+  max-height:calc(100vh - 70px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  min-height:0!important;
+}
+.trail-list{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding-right:6px;
+  padding-bottom:18px;
+  scrollbar-width:thin;
+}
+.right-title,.load-more,.reset-link{
+  flex:0 0 auto!important;
+}
+@media(max-width:900px){
+  .right-panel{
+    height:46vh!important;
+    max-height:46vh!important;
+    min-height:360px!important;
+  }
+}

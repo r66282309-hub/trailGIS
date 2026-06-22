@@ -26,7 +26,9 @@ let publishedCluster = L.markerClusterGroup();
 let publishedRouteLayer = null;
 let searchCircle = null;
 let searchMarker = null;
-let waypointLayer = L.layerGroup().addTo(map);
+let waypointLayer = L.layerGroup();
+let poiVisible = false;
+let cachedWaypoints = [];
 let addPoiMode = false;
 let poiLatLng = null;
 let tempPoiMarker = null;
@@ -52,6 +54,7 @@ function bindEvents() {
   $("radiusKm").addEventListener("input", () => { $("radiusValue").textContent = `${$("radiusKm").value} km`; });
   $("openUpload").addEventListener("click", openUploadModal);
   $("btnAddPoi").addEventListener("click", startAddPoiMode);
+  $("btnTogglePoi")?.addEventListener("click", togglePoiVisibility);
   $("closePoi").addEventListener("click", closePoiModal);
   $("poiCategory").addEventListener("change", updatePoiFields);
   $("btnSavePoi").addEventListener("click", savePoi);
@@ -382,11 +385,30 @@ function resetPoiForm() {
 async function loadWaypoints() {
   const { data, error } = await supabaseClient.from("trail_waypoints").select("*").order("created_at", { ascending: false }).limit(1000);
   if (error) { console.warn("Errore caricamento POI", error.message); return; }
-  renderWaypoints(data || []);
+  cachedWaypoints = data || [];
+  if (poiVisible) renderWaypoints(cachedWaypoints);
+}
+
+async function togglePoiVisibility() {
+  poiVisible = !poiVisible;
+  const btn = $("btnTogglePoi");
+  if (poiVisible) {
+    if (!map.hasLayer(waypointLayer)) waypointLayer.addTo(map);
+    btn?.classList.add("active");
+    if (btn) btn.textContent = "📍 POI ON";
+    $("searchStatus").textContent = "POI attivi sulla mappa.";
+    await loadWaypoints();
+  } else {
+    btn?.classList.remove("active");
+    if (btn) btn.textContent = "📍 POI OFF";
+    if (map.hasLayer(waypointLayer)) map.removeLayer(waypointLayer);
+    $("searchStatus").textContent = "POI nascosti.";
+  }
 }
 
 function renderWaypoints(points) {
   waypointLayer.clearLayers();
+  if (!poiVisible) return;
   points.forEach(p => {
     if (!Number.isFinite(Number(p.lat)) || !Number.isFinite(Number(p.lon))) return;
     const marker = L.marker([Number(p.lat), Number(p.lon)], { icon: poiIcon(p.category) });
