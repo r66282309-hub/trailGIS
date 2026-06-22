@@ -106,3 +106,14 @@ button{cursor:pointer}
     min-height:360px!important;
   }
 }
+
+
+/* Ricerca avanzata percorsi */
+.advanced-modal{width:min(560px,94vw);max-height:92vh;overflow-y:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.advanced-modal h2{font-size:19px;margin:0;text-transform:none}
+.advanced-modal input,.advanced-modal select{width:100%;border:1px solid #d7e1dc;border-radius:8px;padding:10px;margin-bottom:9px;outline:none;font-size:14px;background:#fff}
+.check-row{display:flex;align-items:flex-start;gap:9px;border:1px solid #e1ebe6;background:#f7fbf8;border-radius:10px;padding:10px;margin:9px 0;font-weight:800;color:#18392f}
+.check-row input{width:auto;margin:2px 0 0;accent-color:var(--green-700)}
+.check-row span{display:block;font-weight:600;font-size:12px;color:#6b746f;margin-top:2px}
+.advanced-actions{grid-template-columns:1fr 1fr;margin-top:12px}
+@media(max-width:900px){.advanced-modal{width:94vw}.advanced-actions{grid-template-columns:1fr}}

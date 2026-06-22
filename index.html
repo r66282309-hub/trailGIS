@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TrailGIS Sardegna</title>
+  <title>TrailFinder.app</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -16,13 +16,14 @@
         <svg viewBox="0 0 96 64" role="img"><path d="M6 56 31 13l17 28 10-15 32 30H6Z"/><path d="M31 13 39 56M58 26 67 56"/><path d="M26 34h13l8-13 11 18"/></svg>
       </div>
       <div>
-        <h1>TrailGIS Sardegna</h1>
+        <h1>TrailFinder.app</h1>
         <p>Esplora. Condividi. Valorizza.</p>
       </div>
     </div>
     <nav class="header-nav" aria-label="Navigazione principale">
       <button id="btnExplore" class="nav-link active" type="button">⌕ Esplora</button>
       <button id="btnMyTrails" class="nav-link" type="button">▣ I miei percorsi</button>
+      <button id="btnAdvancedSearch" class="nav-link" type="button">▤ Ricerca avanzata</button>
       <button id="openUpload" class="upload-btn" type="button">Carica percorso</button>
       <button id="btnAddPoi" class="nav-link" type="button">＋ POI</button>
       <button id="userMenu" class="user-pill" type="button"><span id="userAvatar" class="avatar">?</span><span id="userLabel">Accedi</span><span>⌄</span></button>
@@ -51,14 +52,6 @@
         <input id="radiusKm" class="range" type="range" min="5" max="50" step="5" value="20" />
         <div class="range-labels"><span>5 km</span><span>25 km</span><span>50 km</span></div>
         <button id="btnSearchMunicipality2" class="primary full" type="button">Cerca percorsi</button>
-      </section>
-
-      <section class="info-card">
-        <div class="info-icon">ⓘ</div>
-        <div>
-          <h3>Come funziona</h3>
-          <p>Cerca un comune e scegli il raggio di ricerca. Verranno visualizzati tutti i percorsi pubblicati in quell'area.</p>
-        </div>
       </section>
 
       <section class="side-section divider">
@@ -209,6 +202,53 @@
       <textarea id="poiNote" rows="3" placeholder="Descrizione, stato, accesso, dettagli utili..."></textarea>
       <button id="btnSavePoi" class="primary full" type="button">Salva punto</button>
       <p id="poiMessage" class="auth-message muted">Il punto sarà salvato nella posizione scelta sulla mappa.</p>
+    </div>
+  </div>
+
+
+  <div id="advancedSearchModal" class="modal-backdrop" aria-hidden="true">
+    <div class="advanced-modal" role="dialog" aria-modal="true" aria-labelledby="advancedSearchTitle">
+      <div class="section-row">
+        <h2 id="advancedSearchTitle">Cerca percorso</h2>
+        <button id="closeAdvancedSearch" class="icon-btn" type="button">×</button>
+      </div>
+      <p class="field-help">Filtra i percorsi pubblicati in base alle caratteristiche desiderate.</p>
+
+      <label class="form-label" for="advMunicipality">Comune / zona</label>
+      <input id="advMunicipality" type="text" placeholder="Lascia vuoto per cercare ovunque" />
+
+      <div class="two-cols">
+        <div>
+          <label class="form-label" for="advMaxLength">Lunghezza massima (km)</label>
+          <input id="advMaxLength" type="number" min="0" step="0.5" placeholder="Es. 12" />
+        </div>
+        <div>
+          <label class="form-label" for="advMaxElevation">Dislivello massimo (m)</label>
+          <input id="advMaxElevation" type="number" min="0" step="50" placeholder="Es. 600" />
+        </div>
+      </div>
+
+      <label class="check-row"><input id="advLoopOnly" type="checkbox" /> Percorso ad anello</label>
+      <label class="check-row"><input id="advWaterOnly" type="checkbox" /> Sorgente di acqua</label>
+
+      <label class="form-label" for="advGeology">Geologia</label>
+      <select id="advGeology" class="form-control">
+        <option value="">Qualsiasi / non applicare</option>
+        <option value="arenaria">Arenaria</option>
+        <option value="calcare">Calcare</option>
+        <option value="granito">Granito</option>
+        <option value="metamorfica">Metamorfica</option>
+        <option value="marna">Marna</option>
+        <option value="quarziti">Quarziti</option>
+        <option value="vulcaniti_acide">Vulcaniti acide</option>
+        <option value="vulcaniti_basiche">Vulcaniti basiche</option>
+      </select>
+
+      <div class="button-grid advanced-actions">
+        <button id="btnRunAdvancedSearch" class="primary" type="button">Cerca</button>
+        <button id="btnClearAdvancedSearch" class="outline" type="button">Pulisci</button>
+      </div>
+      <p id="advancedSearchMessage" class="auth-message muted">I risultati compariranno nel pannello dei percorsi.</p>
     </div>
   </div>
 

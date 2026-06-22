@@ -50,6 +50,11 @@ function bindEvents() {
   $("trailNameSearch").addEventListener("keydown", e => { if (e.key === "Enter") searchByName(); });
   $("btnExplore").addEventListener("click", () => { setActiveNav("btnExplore"); toggleExplorePopover(); });
   $("btnMyTrails").addEventListener("click", showMyTrails);
+  $("btnAdvancedSearch")?.addEventListener("click", openAdvancedSearchModal);
+  $("closeAdvancedSearch")?.addEventListener("click", closeAdvancedSearchModal);
+  $("btnRunAdvancedSearch")?.addEventListener("click", runAdvancedSearch);
+  $("btnClearAdvancedSearch")?.addEventListener("click", clearAdvancedSearchForm);
+  $("advancedSearchModal")?.addEventListener("click", e => { if (e.target.id === "advancedSearchModal") closeAdvancedSearchModal(); });
   $("municipalitySearch").addEventListener("keydown", e => { if (e.key === "Enter") searchByMunicipality(); });
   $("radiusKm").addEventListener("input", () => { $("radiusValue").textContent = `${$("radiusKm").value} km`; });
   $("openUpload").addEventListener("click", openUploadModal);
@@ -93,6 +98,8 @@ function openAuthModal() { $("authModal").classList.add("open"); $("authModal").
 function closeAuthModal() { $("authModal").classList.remove("open"); $("authModal").setAttribute("aria-hidden", "true"); }
 function openUploadModal() { $("uploadModal").classList.add("open"); $("uploadModal").setAttribute("aria-hidden", "false"); }
 function closeUploadModal() { $("uploadModal").classList.remove("open"); $("uploadModal").setAttribute("aria-hidden", "true"); }
+function openAdvancedSearchModal() { $("advancedSearchModal").classList.add("open"); $("advancedSearchModal").setAttribute("aria-hidden", "false"); }
+function closeAdvancedSearchModal() { $("advancedSearchModal").classList.remove("open"); $("advancedSearchModal").setAttribute("aria-hidden", "true"); }
 function openPoiModal() { $("poiModal").classList.add("open"); $("poiModal").setAttribute("aria-hidden", "false"); }
 function closePoiModal() { $("poiModal").classList.remove("open"); $("poiModal").setAttribute("aria-hidden", "true"); addPoiMode = false; map.getContainer().classList.remove("poi-mode"); if (tempPoiMarker) { map.removeLayer(tempPoiMarker); tempPoiMarker = null; } }
 function toggleExplorePopover() { $("explorePopover").classList.toggle("open"); $("explorePopover").setAttribute("aria-hidden", String(!$("explorePopover").classList.contains("open"))); if ($("explorePopover").classList.contains("open")) setTimeout(() => $("trailNameSearch").focus(), 30); }
@@ -437,6 +444,91 @@ function poiPopupHtml(p) {
 function categoryLabel(value) { return ({ bene_identitario: "Bene identitario", belvedere: "Belvedere", rifugio: "Rifugio", parcheggio: "Parcheggio", segnalazione: "Segnalazione" })[value] || "Punto"; }
 function subtypeLabel(category, value) { return (poiSubtypes[category] || []).find(([v]) => v === value)?.[1] || value || ""; }
 function valueLabel(value) { return String(value || "n.d.").replaceAll("_", " "); }
+
+
+async function runAdvancedSearch() {
+  if (!allPublishedTrails.length) await loadPublishedTrails();
+  if (!cachedWaypoints.length) await loadWaypoints();
+
+  const municipality = $("advMunicipality").value.trim().toLowerCase();
+  const maxLengthKm = Number($("advMaxLength").value);
+  const maxElevationM = Number($("advMaxElevation").value);
+  const loopOnly = $("advLoopOnly").checked;
+  const waterOnly = $("advWaterOnly").checked;
+  const geology = $("advGeology").value;
+  const sources = cachedWaypoints.filter(isWaterSourcePoi);
+
+  let results = allPublishedTrails.filter(trail => {
+    if (municipality && !`${trail.title || ""} ${trail.area || ""} ${trail.description || ""}`.toLowerCase().includes(municipality)) return false;
+
+    const km = (trail.distance_m || 0) / 1000;
+    if (Number.isFinite(maxLengthKm) && maxLengthKm > 0 && km > maxLengthKm) return false;
+
+    const points = geoJsonToPoints(trail.geojson);
+    if (loopOnly && !isLoopTrail(points, 150)) return false;
+
+    const elevationGain = getTrailElevationGain(trail, points);
+    if (Number.isFinite(maxElevationM) && maxElevationM > 0 && elevationGain !== null && elevationGain > maxElevationM) return false;
+
+    if (waterOnly && !trailHasSourceNearby(points, sources, 100)) return false;
+
+    // Predisposizione futura: il campo geologia resta disponibile, ma non filtra ancora
+    // finché non sarà collegato un layer geologico o un attributo geologico del percorso.
+    void geology;
+    return true;
+  });
+
+  visiblePublishedTrails = results;
+  renderTrailList(visiblePublishedTrails);
+  renderPublishedCluster(visiblePublishedTrails);
+  closeAdvancedSearchModal();
+  const geologyNote = geology ? " Il filtro geologico è stato ignorato perché il layer non è ancora collegato." : "";
+  $("searchStatus").textContent = `${results.length} percorsi trovati con la ricerca avanzata.${geologyNote}`;
+}
+
+function clearAdvancedSearchForm() {
+  $("advMunicipality").value = "";
+  $("advMaxLength").value = "";
+  $("advMaxElevation").value = "";
+  $("advLoopOnly").checked = false;
+  $("advWaterOnly").checked = false;
+  $("advGeology").value = "";
+  $("advancedSearchMessage").textContent = "Filtri puliti.";
+}
+
+function isLoopTrail(points, maxDistanceM = 150) {
+  if (!points || points.length < 2) return false;
+  return haversine(points[0], points[points.length - 1]) <= maxDistanceM;
+}
+
+function getTrailElevationGain(trail, points) {
+  const stored = Number(trail.elevation_gain ?? trail.elevation_gain_m ?? trail.ascent_m);
+  if (Number.isFinite(stored) && stored >= 0) return stored;
+  const elevations = (points || []).map(p => p.ele).filter(Number.isFinite);
+  if (elevations.length < 2) return null;
+  let gain = 0;
+  for (let i = 1; i < elevations.length; i++) {
+    const delta = elevations[i] - elevations[i - 1];
+    if (delta > 0) gain += delta;
+  }
+  return gain;
+}
+
+function isWaterSourcePoi(p) {
+  return p?.category === "bene_identitario" && ["fonte", "sorgente"].includes(String(p.subtype || "").toLowerCase());
+}
+
+function trailHasSourceNearby(points, sources, maxDistanceM = 100) {
+  if (!points?.length || !sources?.length) return false;
+  for (const source of sources) {
+    const s = { lat: Number(source.lat), lon: Number(source.lon) };
+    if (!Number.isFinite(s.lat) || !Number.isFinite(s.lon)) continue;
+    for (const point of points) {
+      if (haversine(point, s) <= maxDistanceM) return true;
+    }
+  }
+  return false;
+}
 
 function renderTrailList(trails) {
   const list = $("trailList");
